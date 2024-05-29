@@ -7,9 +7,21 @@ const jwt = require('jsonwebtoken')
 // Obtener todos los movimientos
 // eslint-disable-next-line no-unused-vars
 const getMovements = async (req = request, res = response) => {
+  const token = req.headers.authorization
+
+  console.log('Token recibido en el back: ', { token })
+
+  if (!token) {
+    return res.status(401).json({ msg: 'No token provided' })
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET) // Verificar y decodificar el token
+  const user_id = decoded.user_id // Obtener el user_id del token decodificado
+
   try {
-    const movements = await Movement.findAll()
-    res.json({ movements })
+    const movements = await Movement.findAll({ where: { user_id } })
+    console.log(movements)
+    res.json(movements)
   } catch (error) {
     console.error('Error al obtener los movimientos:', error)
     res.status(500).json({ msg: 'Error interno del servidor' })
