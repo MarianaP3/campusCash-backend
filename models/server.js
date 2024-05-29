@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+require('dotenv').config() // Esto cargará las variables definidas en tu archivo .env
 const { dbConnection } = require('../database/config')
 
 class Server {

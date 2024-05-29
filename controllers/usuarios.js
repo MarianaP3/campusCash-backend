@@ -1,9 +1,26 @@
 /* eslint-disable camelcase */
 const { response, request } = require('express')
 const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const Usuario = require('../models/user')
 const { ROLES } = require('../constants')
+
+// Función para generar un token de autenticación
+const generateAuthToken = (usuario) => {
+  // Generar un token con la información del usuario y una clave secreta
+  const token = jwt.sign(
+    {
+      usuario_id: usuario.user_id,
+      email: usuario.email,
+      role: usuario.role
+    },
+    process.env.JWT_SECRET, // Clave secreta para firmar el token (se debe mantener segura)
+    { expiresIn: '1h' } // Opciones de configuración del token, por ejemplo, tiempo de expiración
+  )
+
+  return token
+}
 
 const usuariosGet = async (req = request, res = response) => {
   const { limit = 5, since = 0 } = req.query
@@ -40,66 +57,90 @@ const getAuthorInfo = async (req = request, res = response) => {
 }
 
 async function usuariosPost (req, res = response) {
-  const {
-    name,
-    email,
-    password
-  } = req.body
+  const { name, email, password } = req.body
 
   console.log('Datos recibidos:', { name, email, password })
 
-  // Verificar si el usuario ya existe en la base de datos
   try {
+    // Verificar si el usuario ya existe en la base de datos
     const usuarioExistente = await Usuario.findOne({ where: { email } })
     console.log('Usuario existente:', usuarioExistente)
 
     if (usuarioExistente) {
-      return res.status(400).json({
-        msg: 'El usuario ya está registrado'
-      })
+      return res.status(400).json({ msg: 'El usuario ya está registrado' })
     }
 
-    // Verificar el dominio del correo electrónico
+    // Verificar el dominio del correo electrónico y asignar el rol
     let role
     if (email.endsWith('@alumnos.uaslp.mx')) {
       role = ROLES.EDITOR
     } else {
-      role = ROLES.STUDENT // O cualquier otro rol por defecto que prefieras
+      role = ROLES.STUDENT
     }
 
     console.log('Rol:', { role })
 
-    const usuario = new Usuario({
-      name,
-      email,
-      password,
-      role // Asigna el rol determinado
-    })
-
     // Encriptar la contraseña
     const salt = bcryptjs.genSaltSync()
-    usuario.password = bcryptjs.hashSync(password, salt)
+    const hashedPassword = bcryptjs.hashSync(password, salt)
 
-    // Guardar en la base de datos
-    await usuario.save()
-
-    res.json({
-      usuario
+    // Crear el usuario en la base de datos
+    const nuevoUsuario = await Usuario.create({
+      name,
+      email,
+      password: hashedPassword,
+      role
     })
+
+    // Generar el token de autenticación para el nuevo usuario
+    const token = generateAuthToken(nuevoUsuario)
+
+    // Devolver la respuesta con el usuario y el token
+    res.json({ usuario: nuevoUsuario, token })
   } catch (error) {
     console.error('Error al verificar o crear usuario:', error)
+    res.status(500).json({ msg: 'Error interno del servidor' })
+  }
+}
+
+async function signin (req, res = response) {
+  const { email, password } = req.body
+
+  console.log('Datos de inicio de sesión:', { email, password })
+
+  try {
+    // Verificar si el usuario existe en la base de datos
+    const usuario = await Usuario.findOne({ where: { email } })
+
+    if (!usuario) {
+      return res.status(400).json({
+        msg: 'El usuario no está registrado'
+      })
+    }
+
+    // Verificar si la contraseña es correcta
+    const passwordMatch = await bcryptjs.compare(password, usuario.password)
+
+    if (!passwordMatch) {
+      return res.status(400).json({
+        msg: 'La contraseña proporcionada es incorrecta'
+      })
+    }
+
+    // Si el usuario existe y la contraseña es correcta, generar token de autenticación
+    const token = generateAuthToken(usuario)
+
+    res.json({
+      usuario,
+      token
+    })
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error)
     res.status(500).json({
       msg: 'Error interno del servidor'
     })
   }
 }
-
-/* async function signin (req, res = response) {
-  const {
-    email,
-    password
-  } = req.body
-} */
 
 const usuariosPut = async (req, res = response) => {
   const { id } = req.params
@@ -150,5 +191,6 @@ module.exports = {
   usuariosDelete,
   getAuthorInfo,
   deactivateUsers,
-  activateUsers
+  activateUsers,
+  signin
 }

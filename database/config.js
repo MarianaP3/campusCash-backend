@@ -16,4 +16,13 @@ const dbConnection = async () => {
   }
 }
 
-module.exports = { sequelize, dbConnection }
+const config = {
+  jwtSecret: process.env.JWT_SECRET || 'mysecretkey', // Cambia 'mysecretkey' por una clave secreta segura
+  jwtExpiresIn: '1h' // Opcional: define la duración del token
+}
+
+module.exports = {
+  sequelize,
+  dbConnection,
+  config
+}

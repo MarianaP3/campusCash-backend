@@ -12,7 +12,8 @@ const {
   usuariosDelete,
   usuariosPut,
   deactivateUsers,
-  activateUsers
+  activateUsers,
+  signin
 } = require('../controllers/usuarios')
 
 const router = Router()
@@ -33,9 +34,15 @@ router.post('/', [
   check('name', 'El nombre es obligatorio').not().isEmpty(),
   check('email', 'El correo es obligatorio').not().isEmpty(),
   check('email').custom((email) => isEmailValid(email)),
-  check('password', 'La contraseña es obligatoria').not().isEmpty(),
-  // validarCampos
+  check('password', 'La contraseña es obligatoria').not().isEmpty()
 ], usuariosPost)
+
+router.post('/signin', [
+  // Middlewares de validación de datos
+  check('email', 'El correo es obligatorio').not().isEmpty(),
+  check('email').isEmail().withMessage('Formato de correo electrónico inválido'),
+  check('password', 'La contraseña es obligatoria').not().isEmpty()
+], signin)
 
 router.put('/api/:id', [
   check('name', 'El nombre es obligatorio').not().isEmpty(),
