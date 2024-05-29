@@ -28,13 +28,13 @@ router.get('/api/:id', [
   validarCampos
 ], usuariosGet)
 
-router.post('/api/usuarios', [
+router.post('/', [
   // middlewares
   check('name', 'El nombre es obligatorio').not().isEmpty(),
   check('email', 'El correo es obligatorio').not().isEmpty(),
   check('email').custom((email) => isEmailValid(email)),
   check('password', 'La contraseña es obligatoria').not().isEmpty(),
-  validarCampos
+  // validarCampos
 ], usuariosPost)
 
 router.put('/api/:id', [
