@@ -10,11 +10,15 @@ const TOPICS = {
   FINANCIAL_LIFE: 'FinancialLife'
 }
 const CATEGORIES = {
-  FOOD: 'food',
-  HEALTH: 'health',
-  TRANSPORT: 'transport',
-  ENTERTAINMENT: 'entertainment',
-  EDUCATION: 'education'
+  Alimentación: 'Alimentación',
+  Salud: 'Salud',
+  Transporte: 'Transporte',
+  Entretenimiento: 'Entretenimiento',
+  Educación: 'Educación',
+  Beca: 'Beca',
+  ApoyoFamiliares: 'ApoyoFamiliares',
+  Empleo: 'Empleo',
+  Emprendimiento: 'Emprendimiento'
 }
 const TYPES = {
   INCOME: 'income',

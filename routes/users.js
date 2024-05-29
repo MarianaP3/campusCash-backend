@@ -3,7 +3,11 @@ const { check } = require('express-validator')
 // const { ROLES } = require('../constants')
 
 const {
-  validarCampos, validarSince, validarLimit, isEmailValid, userExistsById
+  validarCampos,
+  validarSince,
+  validarLimit,
+  isEmailValid,
+  userExistsById
 } = require('../middlewares/index')
 
 const {

@@ -6,22 +6,6 @@ const jwt = require('jsonwebtoken')
 const Usuario = require('../models/user')
 const { ROLES } = require('../constants')
 
-// Función para generar un token de autenticación
-const generateAuthToken = (usuario) => {
-  // Generar un token con la información del usuario y una clave secreta
-  const token = jwt.sign(
-    {
-      usuario_id: usuario.user_id,
-      email: usuario.email,
-      role: usuario.role
-    },
-    process.env.JWT_SECRET, // Clave secreta para firmar el token (se debe mantener segura)
-    { expiresIn: '1h' } // Opciones de configuración del token, por ejemplo, tiempo de expiración
-  )
-
-  return token
-}
-
 const usuariosGet = async (req = request, res = response) => {
   const { limit = 5, since = 0 } = req.query
   const query = { status: true }
@@ -93,10 +77,12 @@ async function usuariosPost (req, res = response) {
     })
 
     // Generar el token de autenticación para el nuevo usuario
-    const token = generateAuthToken(nuevoUsuario)
+    const token = jwt.sign({ user_id: nuevoUsuario.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+
+    console.log('Token: ', { token })
 
     // Devolver la respuesta con el usuario y el token
-    res.json({ usuario: nuevoUsuario, token })
+    res.json({ usuario: token })
   } catch (error) {
     console.error('Error al verificar o crear usuario:', error)
     res.status(500).json({ msg: 'Error interno del servidor' })
@@ -128,10 +114,12 @@ async function signin (req, res = response) {
     }
 
     // Si el usuario existe y la contraseña es correcta, generar token de autenticación
-    const token = generateAuthToken(usuario)
+    console.log('Se está generando el token con el usuario', usuario.user_id)
+    const token = jwt.sign({ user_id: usuario.user_id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+
+    console.log('Token: ', { token })
 
     res.json({
-      usuario,
       token
     })
   } catch (error) {

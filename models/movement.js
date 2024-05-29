@@ -34,7 +34,7 @@ const Movement = sequelize.define('Movement', {
     allowNull: false
   }
 }, {
-  tableName: 'Movements',
+  tableName: 'movement',
   timestamps: false
 })
 
