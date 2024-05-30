@@ -1,40 +1,32 @@
 /* eslint-disable camelcase */
 const { response, request } = require('express')
+const jwt = require('jsonwebtoken')
 
 const Contenido = require('../models/content')
 
 // GET METHODS
 const contentsGet = async (req = request, res = response) => {
-  const { limit = 5, since = 0 } = req.query
-  const query = { approved: true }
+  const token = req.headers.authorization
 
-  const [total, contenidos] = await Promise.all([
-    // It runs simultaneously
-    Contenido.countDocuments(query)
-      .skip(since)
-      .limit(limit)
-  ])
+  console.log('Token recibido en el back: ', { token })
 
-  res.json({
-    total,
-    contenidos
-  })
+  if (!token) {
+    return res.status(401).json({ msg: 'No token provided' })
+  }
+
+  // const decoded = jwt.verify(token, process.env.JWT_SECRET) // Verificar y decodificar el token
+  // const user_id = decoded.user_id // Obtener el user_id del token decodificado
+
+  try {
+    const movements = await Contenido.findAll()
+    console.log(movements)
+    res.json(movements)
+  } catch (error) {
+    console.error('Error al obtener los movimientos:', error)
+    res.status(500).json({ msg: 'Error interno del servidor' })
+  }
 }
-const getContentsByTopic = async (req = request, res = response) => {
-  // Dynamic query for the topic content
-  const { limit = 10, since = 0 } = req.query
-  const query = { topic: req.topic }
-  // It runs simultaneously
-  const [total, contenidos] = await Promise.all([
-    Contenido.find(query)
-      .skip(since)
-      .limit(limit)
-  ])
-  res.json({
-    total,
-    contenidos
-  })
-}
+
 const getContentHiglight = async (req = request, res = response) => {
   // find a content by their id
   // const { id } = req.params
@@ -55,17 +47,25 @@ async function contentsPost (req, res = response) {
   const {
     title,
     content,
-    image,
-    topic,
-    editor
+    image
   } = req.body
+
+  const token = req.headers.authorization
+  console.log('Token recibido en el back: ', { token })
+
+  if (!token) {
+    return res.status(401).json({ msg: 'No token provided' })
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET) // Verificar y decodificar el token
+  const user_id = decoded.user_id // Obtener el user_id del token decodificado
 
   const contenido = new Contenido({
     title,
     content,
     image,
-    topic,
-    editor
+    user_id,
+    topic_id: 1
   })
   await contenido.save()
   res.json({
@@ -113,7 +113,6 @@ const contentDelete = async (req, res = response) => {
 module.exports = {
   contentDelete,
   contentsGet,
-  getContentsByTopic,
   getContentHiglight,
   contentsPost,
   contentsPut

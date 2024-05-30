@@ -22,10 +22,9 @@ const Content = sequelize.define('Content', {
     type: DataTypes.STRING
   },
   topic_id: {
-    type: DataTypes.ENUM(...Object.values(TOPICS)),
-    allowNull: false
+    type: DataTypes.ENUM(...Object.values(TOPICS))
   },
-  author_id: {
+  user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
@@ -34,7 +33,7 @@ const Content = sequelize.define('Content', {
     }
   }
 }, {
-  tableName: 'Content',
+  tableName: 'content',
   timestamps: false // Deshabilitar timestamps si no los necesitas
 })
 

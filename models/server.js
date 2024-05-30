@@ -8,7 +8,7 @@ class Server {
     this.app = express()
     this.port = process.env.PORT || 3000
     this.usuariosPath = '/api/usuarios'
-    this.contenidosPath = '/api/contents'
+    this.contenidosPath = '/api/contenidos'
     this.movimientosPath = '/api/movimientos'
 
     // Conectar a la base de datos
