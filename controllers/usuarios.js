@@ -92,6 +92,28 @@ async function usuariosPost (req, res = response) {
   }
 }
 
+const getUserDetails = async (req, res) => {
+  const token = req.headers.authorization
+
+  if (!token) {
+    return res.status(401).json({ msg: 'No token provided' })
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await Usuario.findByPk(decoded.user_id) // Usar findByPk para buscar por id
+
+    if (!user) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' })
+    }
+
+    res.json({ role: user.role })
+  } catch (error) {
+    console.error('Error al obtener los detalles del usuario:', error)
+    res.status(500).json({ msg: 'Error interno del servidor' })
+  }
+}
+
 async function signin (req, res = response) {
   const { email, password } = req.body
 
@@ -183,5 +205,6 @@ module.exports = {
   getAuthorInfo,
   deactivateUsers,
   activateUsers,
-  signin
+  signin,
+  getUserDetails
 }

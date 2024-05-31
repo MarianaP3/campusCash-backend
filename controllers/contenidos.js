@@ -6,23 +6,12 @@ const Contenido = require('../models/content')
 
 // GET METHODS
 const contentsGet = async (req = request, res = response) => {
-  const token = req.headers.authorization
-
-  console.log('Token recibido en el back: ', { token })
-
-  if (!token) {
-    return res.status(401).json({ msg: 'No token provided' })
-  }
-
-  // const decoded = jwt.verify(token, process.env.JWT_SECRET) // Verificar y decodificar el token
-  // const user_id = decoded.user_id // Obtener el user_id del token decodificado
-
   try {
-    const movements = await Contenido.findAll()
-    console.log(movements)
-    res.json(movements)
+    const contents = await Contenido.findAll()
+    console.log(contents)
+    res.json(contents)
   } catch (error) {
-    console.error('Error al obtener los movimientos:', error)
+    console.error('Error al obtener los contenidos:', error)
     res.status(500).json({ msg: 'Error interno del servidor' })
   }
 }
@@ -73,14 +62,32 @@ async function contentsPost (req, res = response) {
   })
 }
 
-const contentsPut = async (req, res = response) => {
-  const { id } = req.params
-  const { __id, ...resto } = req.body
-  // let approved = false
-  // if an author changes their content, the content must be approved again by an editor
-  const contenido = await Contenido.findByIdAndUpdate(id, resto)
+async function contentsPut(req, res = response) {
+  const { id } = req.params // Obtener el ID del contenido a actualizar
+  const { title, content } = req.body // Obtener los nuevos valores de título y contenido
 
-  res.json(contenido)
+  try {
+    // Buscar el contenido por su ID
+    let contenido = await Contenido.findByPk(id)
+
+    // Verificar si el contenido existe
+    if (!contenido) {
+      return res.status(404).json({ msg: 'Contenido no encontrado' })
+    }
+
+    // Actualizar el título y el contenido del contenido
+    contenido.title = title
+    contenido.content = content
+
+    // Guardar los cambios en la base de datos
+    await contenido.save()
+
+    // Devolver la respuesta con el contenido actualizado
+    res.json({ msg: 'Contenido actualizado correctamente', contenido })
+  } catch (error) {
+    console.error('Error al actualizar el contenido:', error)
+    res.status(500).json({ msg: 'Error interno del servidor' })
+  }
 }
 
 const contentDelete = async (req, res = response) => {

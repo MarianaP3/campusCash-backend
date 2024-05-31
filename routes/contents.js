@@ -34,10 +34,6 @@ router.post('/', [
 ], contentsPost)
 
 router.put('/:id', [
-  check('id', 'No es un ID válido').isMongoId(),
-  check('id').custom(contentExistsById),
-  check('link').custom((link) => isLinkValid(link)),
-  validarCampos
 ], contentsPut)
 
 module.exports = router

@@ -17,7 +17,8 @@ const {
   usuariosPut,
   deactivateUsers,
   activateUsers,
-  signin
+  signin,
+  getUserDetails
 } = require('../controllers/usuarios')
 
 const router = Router()
@@ -40,6 +41,8 @@ router.post('/', [
   check('email').custom((email) => isEmailValid(email)),
   check('password', 'La contraseña es obligatoria').not().isEmpty()
 ], usuariosPost)
+
+router.get('/user-details', [], getUserDetails)
 
 router.post('/signin', [
   // Middlewares de validación de datos
