@@ -4,6 +4,7 @@ const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const Usuario = require('../models/user')
+const Movement = require('../models/Movement')
 const { ROLES } = require('../constants')
 
 const usuariosGet = async (req = request, res = response) => {
@@ -80,6 +81,8 @@ async function usuariosPost (req, res = response) {
     const token = jwt.sign({ user_id: nuevoUsuario.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
 
     console.log('Token: ', { token })
+
+    // console.log('Movimientos creados:', newIncome, newExpense)
 
     // Devolver la respuesta con el usuario y el token
     res.json({ usuario: token })
